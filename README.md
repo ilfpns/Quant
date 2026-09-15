@@ -25,7 +25,7 @@ Options:
 - `--confidence` (default `0.5`)
 - `--width` / `--height` (default `1280x720`)
 
-Press `q` to quit.
+Press `q` to quit, `c` to print a benchmark report (FPS, avg inference latency, model size, avg CPU usage) for everything measured so far.
 
 ### Structure
 
@@ -34,9 +34,19 @@ person_detector/
   camera.py      # webcam capture (Camera)
   detector.py     # YOLOv8 inference, filtered to the "person" class (PersonDetector, Detection)
   visualizer.py   # draws bounding boxes / labels on frames (draw_detections)
-  app.py          # wires camera + detector + visualizer into the run loop (PersonDetectionApp)
-main.py           # CLI entry point
+  metrics.py      # FPS / latency / model size / CPU tracking (PerformanceMonitor, print_report)
+  app.py          # wires camera + detector + visualizer + metrics into the run loop (PersonDetectionApp)
+main.py           # CLI entry point for the live viewer
+computer_info.py  # CLI entry point for a headless benchmark run
 ```
+
+### Benchmark
+
+```bash
+python computer_info.py
+```
+
+Runs the camera + detector for a fixed duration (default 15s, `--duration`) and reports FPS, average per-frame inference latency (ms), model file size (MB), and average CPU usage (`psutil`, skip with `--no-cpu`).
 
 ### Component Guidelines
 

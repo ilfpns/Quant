@@ -14,6 +14,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--confidence", type=float, default=0.5)
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
+    parser.add_argument("--no-cpu", action="store_true")
     return parser.parse_args()
 
 
@@ -23,7 +24,7 @@ def main() -> None:
     camera = Camera(index=args.camera_index, width=args.width, height=args.height)
     detector = PersonDetector(model_path=args.model, confidence_threshold=args.confidence)
 
-    app = PersonDetectionApp(camera=camera, detector=detector)
+    app = PersonDetectionApp(camera=camera, detector=detector, track_cpu=not args.no_cpu)
     app.run()
 
 
