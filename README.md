@@ -22,8 +22,8 @@ Avg CPU usage       : 78.7 %
 ```
 
 ### 학습 TIL 
-학습 TIL은 다음 링크에서 확인 가능하다.
-[TIL 보러가🫡](https://github.com/ilfpns/IL/tree/main/Projects/Quant)
+학습 TIL은 다음 링크에서 확인 가능하다. <br>
+[TIL 보러가기 🫡](https://github.com/ilfpns/IL/tree/main/Projects/Quant)
 
 ### 1단계: PTQ (Dynamic) — 진행 중
 
