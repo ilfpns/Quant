@@ -15,6 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
     parser.add_argument("--no-cpu", action="store_true")
+    parser.add_argument("--quantize", action="store_true", help="apply PyTorch dynamic quantization")
     return parser.parse_args()
 
 
@@ -22,7 +23,11 @@ def main() -> None:
     args = parse_args()
 
     camera = Camera(index=args.camera_index, width=args.width, height=args.height)
-    detector = PersonDetector(model_path=args.model, confidence_threshold=args.confidence)
+    detector = PersonDetector(
+        model_path=args.model,
+        confidence_threshold=args.confidence,
+        quantize=args.quantize,
+    )
 
     app = PersonDetectionApp(camera=camera, detector=detector, track_cpu=not args.no_cpu)
     app.run()

@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import numpy as np
 from ultralytics import YOLO
 
+from person_detector.quantization import dynamic_quantize
+
 PERSON_CLASS_ID = 0
 
 
@@ -18,9 +20,17 @@ class Detection:
 
 
 class PersonDetector:
-    def __init__(self, model_path: str = "yolov8n.pt", confidence_threshold: float = 0.5) -> None:
+    def __init__(
+        self,
+        model_path: str = "yolov8n.pt",
+        confidence_threshold: float = 0.5,
+        quantize: bool = False,
+    ) -> None:
         self.model_path = model_path
+        self.is_quantized = quantize
         self._model = YOLO(model_path)
+        if quantize:
+            self._model.model = dynamic_quantize(self._model.model)
         self._confidence_threshold = confidence_threshold
 
     def detect(self, frame: np.ndarray) -> list[Detection]:

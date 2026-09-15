@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pt
+*.onnx
+*.engine
+benchmark_log.txt

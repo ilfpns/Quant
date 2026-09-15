@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 try:
@@ -81,3 +82,28 @@ def print_report(result: BenchmarkResult, cpu_tracking_enabled: bool) -> None:
     else:
         print("Avg CPU usage       : (disabled via --no-cpu)")
     print("=============================")
+
+
+LOG_COLUMNS = ("label", "timestamp", "frames", "duration_s", "fps", "avg_latency_ms", "model_size_mb", "avg_cpu_pct")
+
+
+def append_report_to_log(log_path: str, label: str, result: BenchmarkResult) -> None:
+    path = Path(log_path)
+    is_new_file = not path.exists()
+
+    cpu_value = f"{result.avg_cpu_percent:.1f}" if result.avg_cpu_percent is not None else "NA"
+    row = (
+        label,
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        str(result.frame_count),
+        f"{result.elapsed_seconds:.2f}",
+        f"{result.fps:.2f}",
+        f"{result.avg_latency_ms:.2f}",
+        f"{result.model_size_mb:.2f}",
+        cpu_value,
+    )
+
+    with path.open("a", encoding="utf-8") as log_file:
+        if is_new_file:
+            log_file.write("\t".join(LOG_COLUMNS) + "\n")
+        log_file.write("\t".join(row) + "\n")
