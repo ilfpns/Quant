@@ -19,6 +19,7 @@ class Detection:
 
 class PersonDetector:
     def __init__(self, model_path: str = "yolov8n.pt", confidence_threshold: float = 0.5) -> None:
+        self.model_path = model_path
         self._model = YOLO(model_path)
         self._confidence_threshold = confidence_threshold
 
