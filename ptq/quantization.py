@@ -6,6 +6,7 @@ import torch
 from torch import nn
 
 ARM_MACHINES = {"aarch64", "arm64", "armv7l"}
+DEFAULT_DYNAMIC_QUANTIZE_LAYERS = {nn.Linear, nn.LSTM}
 
 
 def default_quantized_engine() -> str:
@@ -19,7 +20,8 @@ def default_quantized_engine() -> str:
     raise RuntimeError("No supported PyTorch quantized backend engine found on this machine")
 
 
-def dynamic_quantize(model: nn.Module) -> nn.Module:
+def dynamic_quantize(model: nn.Module, layers: set[type[nn.Module]] | None = None) -> nn.Module:
     torch.backends.quantized.engine = default_quantized_engine()
     model.eval()
-    return torch.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)
+    target_layers = layers if layers is not None else DEFAULT_DYNAMIC_QUANTIZE_LAYERS
+    return torch.quantization.quantize_dynamic(model, target_layers, dtype=torch.qint8)
