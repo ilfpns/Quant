@@ -6,7 +6,7 @@ from typing import Iterable
 import torch
 from torch import nn
 
-from ptq.backend import default_quantized_engine
+from quanti.backend import default_quantized_engine
 
 DEFAULT_DYNAMIC_QUANTIZE_LAYERS = {nn.Linear, nn.LSTM}
 
