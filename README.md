@@ -33,3 +33,13 @@ PyTorch로 모델 경량화(양자화)를 단계적으로 학습/실험하는 �
 ### 1단계: PTQ (Dynamic) — 완료
 
 `torch.quantization.quantize_dynamic`을 `nn.Linear` + `nn.LSTM` 대상으로 적용해 `SimpleLSTM` 예제로 검증함.
+
+### 2단계: PTQ (Static) — 완료
+
+`torch.quantization.prepare` / `convert`로 weight + activation을 calibration 데이터(임의 정규분포 샘플)로 고정해 `SimpleMLP`에 적용함. Dynamic PTQ와 state dict 크기는 비슷했지만, calibration 표본이 실제 데이터 분포와 다르면 MaxDiff가 더 커질 수 있다는 점을 확인함.
+
+### 3단계: QAT (Quantization Aware Training) — 완료
+
+`torch.quantization.prepare_qat`으로 fake-quant를 삽입한 뒤, FP32 모델을 teacher로 삼아 (임의 입력 → FP32 출력) 쌍으로 self-distillation 학습을 진행하고 `convert`로 변환함(`ptq/quantization.py`의 `qat_quantize`, `build_self_distillation_data`).
+
+다만 이번 실험 조건(FP32 teacher가 사전 학습되지 않은 무작위 초기화 모델, 학습 데이터도 임의 정규분포)에서는 QAT의 MaxDiff가 Static PTQ보다 오히려 크게 측정됨 — 의미 있는 task 신호가 없다 보니 학습이 진행될수록 가중치가 fake-quant 노이즈에 맞춰 흔들리며 원래 FP32 출력에서 더 멀어진 것으로 보임. 실제 라벨 데이터 + 사전 학습된 모델로 QAT를 적용하면 정석대로 PTQ보다 오차가 줄어들 가능성이 높음 — 다음 단계(Jetson TensorRT 변환) 전에 확인이 필요함.

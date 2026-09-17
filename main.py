@@ -3,7 +3,12 @@ from __future__ import annotations
 import torch
 
 from ptq.model import SimpleMLP
-from ptq.quantization import dynamic_quantize, static_quantize
+from ptq.quantization import (
+    build_self_distillation_data,
+    dynamic_quantize,
+    qat_quantize,
+    static_quantize,
+)
 from ptq.report import (
     SpeedResult,
     max_output_diff,
@@ -16,6 +21,8 @@ from ptq.report import (
 
 INPUT_SIZE = 128
 CALIBRATION_BATCHES = 32
+QAT_TRAIN_BATCHES = 200
+QAT_EPOCHS = 3
 
 
 def main() -> None:
@@ -25,20 +32,24 @@ def main() -> None:
 
     sample_input = torch.randn(1, INPUT_SIZE)
     calibration_data = [torch.randn(1, INPUT_SIZE) for _ in range(CALIBRATION_BATCHES)]
+    qat_train_data = build_self_distillation_data(fp32_model, INPUT_SIZE, QAT_TRAIN_BATCHES)
 
     dynamic_model = dynamic_quantize(fp32_model)
     static_model = static_quantize(fp32_model, calibration_data)
+    qat_model = qat_quantize(fp32_model, qat_train_data, epochs=QAT_EPOCHS)
 
     with torch.no_grad():
         fp32_output = fp32_model(sample_input)
         dynamic_output = dynamic_model(sample_input)
         static_output = static_model(sample_input)
+        qat_output = qat_model(sample_input)
 
     print_size_report(
         [
             measure("FP32", fp32_model),
             measure("Dynamic PTQ (INT8)", dynamic_model),
             measure("Static PTQ (INT8)", static_model),
+            measure("QAT (INT8)", qat_model),
         ]
     )
 
@@ -53,6 +64,11 @@ def main() -> None:
             "Static PTQ",
             measure_latency_ms(static_model, sample_input),
             max_output_diff(fp32_output, static_output),
+        ),
+        SpeedResult(
+            "QAT",
+            measure_latency_ms(qat_model, sample_input),
+            max_output_diff(fp32_output, qat_output),
         ),
     ]
 
