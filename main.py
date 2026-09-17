@@ -3,12 +3,8 @@ from __future__ import annotations
 import torch
 
 from ptq.model import SimpleMLP
-from ptq.quantization import (
-    build_self_distillation_data,
-    dynamic_quantize,
-    qat_quantize,
-    static_quantize,
-)
+from ptq.ptq import dynamic_quantize, static_quantize
+from ptq.qat import build_self_distillation_data, qat_quantize
 from ptq.report import (
     SpeedResult,
     max_output_diff,
