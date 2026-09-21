@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import torch
 
+from quanti.export import default_onnx_filename, export_to_onnx, onnx_file_size_kb
 from quanti.model import SimpleMLP
 from quanti.ptq import dynamic_quantize, static_quantize
 from quanti.qat import build_self_distillation_data, qat_quantize
@@ -70,6 +71,14 @@ def main() -> None:
 
     print_speed_table(speed_results)
     print_accuracy_report(speed_results)
+
+    onnx_path = default_onnx_filename(fp32_model)
+    export_to_onnx(fp32_model, sample_input, onnx_path)
+    print()
+    print("===== ONNX Export =====")
+    print(f"Path: {onnx_path}")
+    print(f"Size: {onnx_file_size_kb(onnx_path):.2f} KB")
+    print("========================")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,20 @@
 from __future__ import annotations
 
+from datetime import datetime
+from pathlib import Path
+
 import torch
 from torch import nn
+
+
+def default_onnx_filename(model: nn.Module, date: datetime | None = None) -> str:
+    """"<모델 클래스명>_<YYYYMMDD>.onnx" 형식의 기본 파일명을 만든다."""
+    date_str = (date or datetime.now()).strftime("%Y%m%d")
+    return f"{type(model).__name__}_{date_str}.onnx"
+
+
+def onnx_file_size_kb(path: str) -> float:
+    return Path(path).stat().st_size / 1024
 
 
 def export_to_onnx(
